@@ -1,0 +1,13 @@
+venv/
+files_assets/
+goonbase.db
+modules/discord_bot_token.py
+cogs/birthdays.py
+.idea/
+__pycache__/
+run.bat
+cogs/art.py
+modules/mongo_creds.py
+passwords_and_keys/
+disabled_cogs/polling.py
+disabled_cogs/event_maker.py
