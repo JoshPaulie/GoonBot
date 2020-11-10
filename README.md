@@ -1,5 +1,5 @@
 # Goonbot
-Somewhere between a passion project and an objection... lives `Goonbot`
+Somewhere between a passion project and an obsession... lives `Goonbot`
 
 ## Purpose
 `Goonbot` is proprietary Discord.py bot that would be rather useless to anyone outside of the discord is manages. Code is public because I’m monke-brained and need help on a recurring basis. 
