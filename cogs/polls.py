@@ -5,10 +5,10 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 
-files_assets_path = Path("files_assets")
+files_assets_path = Path("helpers")
 
 
-class Polls(commands.Cog):
+class Polls(commands.Cog, name="Polls! 🗳"):
 
     def __init__(self, bot):
         self.bot = bot

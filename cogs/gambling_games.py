@@ -4,7 +4,7 @@ from modules.sql_helper import *
 from discord.ext import commands
 from pathlib import Path
 
-files_assets_path = Path("files_assets")
+files_assets_path = Path("helpers")
 
 possible_scratches = ['🍎', '🥭', '🍌', '🍒', '🍑']
 
@@ -31,13 +31,13 @@ def play_scratchoff():
         return 0, scratch_sheet
 
 
-class Scratchers(commands.Cog):
+class Scratchers(commands.Cog, name="Gambling Games! 🎲"):
 
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
 
-    @commands.command(name='scratchoff', aliases=['scratcher', 's3'])
+    @commands.command(name='s3', aliases=['scratcher', 'scratchoff'])
     async def scratchoff(self, ctx):
         """Plays 1 scratch off"""
         message = ctx.message

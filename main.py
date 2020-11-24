@@ -4,15 +4,14 @@ import colored
 import discord
 from colored import stylize
 from discord.ext import commands, tasks
-from progress.bar import Bar
 
-from modules.discord_bot_token import discord_bot_token
 from modules.paulie_tools import current_time, random_game_name
 from modules.sql_helper import initialize
+from passwords_and_keys.discord_bot_token import discord_bot_token
 
 intents = discord.Intents(messages=True, guilds=True, reactions=True)
-bot = commands.Bot(command_prefix='.', case_insensitive=True, intents=intents)
-files_assets_path = Path("files_assets")
+bot = commands.Bot(command_prefix='.', case_insensitive=True, intents=intents, help_command=None)
+files_assets_path = Path("helpers")
 
 
 def collect_cogs():
@@ -27,7 +26,6 @@ def load_cogs():
     for cog in collect_cogs():
         try:
             bot.load_extension(cog)
-            # print(f"Loaded {cog}")
             good_loads += 1
         except Exception as e:
             print(f"Failed to load cog {cog}\n{e}")
@@ -55,7 +53,7 @@ async def on_message(message):
 
 @bot.command(name='game', aliases=['playing', 'addgame'])
 async def playing_game(ctx, *, game):
-    '''Sets the game being played by bot'''
+    """Adds game being library, to be played by bot"""
     await bot.change_presence(activity=discord.Game(name=game))
     with open(files_assets_path / 'bot_game_list.txt', mode='w') as file:
         file.write(f'{game}')

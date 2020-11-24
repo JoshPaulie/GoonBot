@@ -1,13 +1,14 @@
 import datetime
 import random
 
+import bot_config
 import colored
+import discord
 from colored import stylize
 from discord.ext import commands, tasks
-
 from modules.paulie_tools import calc_time, current_time
 
-time_keeper_file = "files_assets/time_keeper.txt"
+time_keeper_file = "helpers/time_keeper.txt"
 
 
 class ListenersAndEvents(commands.Cog):
@@ -29,10 +30,15 @@ class ListenersAndEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_command(self, ctx):
         """Prints commands to console"""
-        message = ctx.message
-        content = message.content
-        print(
-            f"{stylize(current_time(), colored.fg(115))} ({message.author.name}) {content}")
+        if ctx.author.id != bot_config.joshpaulie:
+            message = ctx.message
+            content = message.content
+            goon = message.author.name
+            console_channel = self.bot.get_channel(bot_config.dashboard_channels['console_channel'])
+
+            embed_on_command = discord.Embed(title=goon, description=content)
+            embed_on_command.set_footer(text=f'{current_time()}')
+            await console_channel.send(embed=embed_on_command)
 
     @tasks.loop(seconds=10.0)
     async def time_keeper(self):
@@ -43,13 +49,13 @@ class ListenersAndEvents(commands.Cog):
     @commands.Cog.listener()  # Taboo!
     async def on_message(self, message):
         """Justin ellipsis watcher 👀"""
-        condemnings = [
+        condemning_s = [
             "You have disappointed Justin.",
             "..Justin is speechless..you should be ashamed.",
             "..."
         ]
         if message.author.id == 104488534936666112 and message.content in ["." * count for count in range(1, 5)]:
-            await message.channel.send(random.choice(condemnings))
+            await message.channel.send(random.choice(condemning_s))
 
 
 def setup(bot):

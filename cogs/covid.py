@@ -9,7 +9,7 @@ def make_df():
     return data_us
 
 
-class CoronaVirus(commands.Cog):
+class CoronaVirus(commands.Cog, name="Covid 😷"):
 
     def __init__(self, bot):
         self.bot = bot
@@ -17,7 +17,7 @@ class CoronaVirus(commands.Cog):
 
     @commands.command(name='virus', aliases=['covid', 'corona', 'covid19', 'thevarus', 'varus'])
     async def virus(self, ctx, state: str = None):
-        '''The beginnings of `.virus (ok, az, md, ca)`'''
+        """Covid Data in Goon States"""
 
         goon_cases = 1
         goon_mortality_rate = 100  # if i catch the virus and my lungs crap out PLEASE update this for me, we strive

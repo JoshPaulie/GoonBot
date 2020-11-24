@@ -4,10 +4,10 @@ import datetime
 from discord.ext import commands
 from pathlib import Path
 
-files_assets_path = Path("files_assets")
+files_assets_path = Path("helpers")
 
 
-class hobousernames(commands.Cog):
+class hobousernames(commands.Cog, name="Hobo's Usernames! 🤖"):
 
     def __init__(self, bot):
         self.bot = bot
@@ -16,34 +16,35 @@ class hobousernames(commands.Cog):
     @commands.cooldown(1, 5)
     @commands.command(name='username', aliases=['hobo', 'un', 'name'])
     async def username(self, ctx):
-        '''Fetches one of Hobo's Signature Usernames'''
+        """Fetches one of Hobo's Signature Usernames"""
 
         if datetime.datetime.now().month == 11:
 
-            with open(Path(files_assets_path / 'hobo_usernames.txt')) as file:
+            with open(Path(files_assets_path / 'hobo_usernames/hobo_usernames.txt')) as file:
                 random_name = random.choice(file.readlines())
             await ctx.send(random_name)
         else:
-            with open(Path(files_assets_path / 'hobo_halloween_usernames.txt')) as file:
+            with open(Path(files_assets_path / 'hobo_usernames/hobo_halloween_usernames.txt')) as file:
                 random_name = random.choice(file.readlines())
             await ctx.send(random_name)
 
     @username.error
     async def usernameError(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"Hey there! **To prevent repeats and ensure a positive user experience**, you must wait `{round(error.retry_after)}` more seconds.")
+            await ctx.send(
+                f"Hey there! **To prevent repeats and ensure a positive user experience**, you must wait `{round(error.retry_after)}` more seconds.")
 
     @commands.command(name='addnames')
     async def howaddnames(self, ctx):
-        '''Instructions on how Hobo can add more names'''
+        """Instructions on how Hobo can add more names"""
         message = ctx.message
         with open(files_assets_path / 'how_to_add_names.txt', mode='r') as instructions:
             read_inst = instructions.read()
             await message.author.send(read_inst)
 
-    @commands.command(name='howmany',aliases=['howmanynames','howmanyusernames'])
-    async def howmanynames(self,ctx):
-        '''Lets you know how many names are on Hobo's growing list'''
+    @commands.command(name='howmany', aliases=['howmanynames', 'howmanyusernames'])
+    async def howmanynames(self, ctx):
+        """Lets you know how many names are on Hobo's growing list"""
         with open(files_assets_path / 'hobo_usernames.txt', mode='r') as file:
             for i, l in enumerate(file):
                 pass

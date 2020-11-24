@@ -1,27 +1,21 @@
-import discord
 from discord.ext import commands
 
 
-class Links(commands.Cog):
+class Links(commands.Cog, name="Links! 🌐"):
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name='paypig', aliases=['dekar'])
     async def paypig(self, ctx):
-        '''Link to Dekar's stream'''
+        """Link to Dekar's stream"""
         message = ctx.message
         await ctx.send('https://www.twitch.tv/dekar173')
         await message.add_reaction('🐽')
 
-    @commands.command(name='github', aliases=['code', 'source'])
-    async def github(self, ctx):
-        '''Check out the python code 🐍'''
-        await ctx.send('https://github.com/JoshPaulie/GoonBot')
-
     @commands.command(name='jerma', aliases=['jerma985'])
     async def github(self, ctx):
-        '''Link to Jerma'''
+        """Link to Jerma's Stream"""
         await ctx.send('https://www.twitch.tv/jerma985')
 
 
