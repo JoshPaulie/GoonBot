@@ -1,0 +1,11 @@
+---
+**If your name is hobo and you are a username genius..**
+DM a name (or multiple names, one name per line) to <@727921429571436564>
+
+**Do not** seperate names as follows:
+`Rooftop Beach, Doctor Optopus`
+
+Each username should be on a new line, like it would be in your `tism.txt`.
+
+If you are not hobo, your dm's will be ignored. =D
+---

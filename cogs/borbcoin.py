@@ -4,9 +4,10 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 
+from modules.paulie_tools import error_embed
 from modules.sql_helper import query, qall, change_money
 
-files_assets_path = Path("files_assets")
+files_assets_path = Path("helpers")
 
 
 def purchase_check(current_balance, cost_of_item):
@@ -16,7 +17,7 @@ def purchase_check(current_balance, cost_of_item):
         return True
 
 
-class BorbCoin(commands.Cog):
+class BorbCoin(commands.Cog, name="Borbcoin! 💰"):
 
     def __init__(self, bot):
         self.bot = bot
@@ -34,7 +35,7 @@ class BorbCoin(commands.Cog):
         ranNum = random.randint(0, self.borb_chance)
         if 'b.' not in message.content:  # ignore bongo commands
             if ranNum == 1:
-                self.borb_chance = random.randint(200, 800)
+                self.borb_chance = random.randint(200, 1000)
                 await message.add_reaction('<:borb:452006705035739136>')
                 change_money(message.author.id, 1)
                 embed = discord.Embed(title=f"{message.author.name} mined 1 BORB!",
@@ -43,7 +44,9 @@ class BorbCoin(commands.Cog):
 
     @commands.command(name='balance', aliases=['wallet'])
     async def balance(self, ctx, user: discord.Member = None):
-        '''Checks balance of yourself, or @user'''
+        """Checks balance of yourself, or @user
+
+        Syntax: `.borb @user`"""
         message = ctx.message
         borb_amount = None
         if user is None:
@@ -60,6 +63,7 @@ class BorbCoin(commands.Cog):
 
     @commands.command(name='bank')
     async def bank(self, ctx):
+        """Leader-board style balances of everyone's wallet"""
         message = ctx.message
         try:
             balances = qall()
@@ -71,58 +75,34 @@ class BorbCoin(commands.Cog):
             scoreboard.set_footer(text=f'Current value: 1:{self.borb_chance}')
             await ctx.send(embed=scoreboard)
         except:
-            await ctx.send("This feature is currently broken. 🙁")
+            await error_embed(ctx, "This feature is currently broken. 🙁\n"
+                                   "I don't know why. It keeps me up at night.")
 
-    # Sends borb from one wallet, to anothers
     @commands.command(name='borb', aliases=['gift', 'give', 'send'])
-    async def borb(self, ctx, user: discord.Member = None, donate_amount: int = 1, *, note=None):
-        '''Sends x amount of BORB to recipient'''
+    async def borb(self, ctx, user: discord.Member, donate_amount: int = 1, *, note=None):
+        """Sends x amount of BORB to recipient
+
+        Syntax: `.borb @user (Number Amount) (Optional Note)`"""
         message = ctx.message
-
-        if user is not None:
-            data = query(ctx.author.id)
-            current_money = data[1]
-            if purchase_check(current_money, donate_amount):
-                change_money(ctx.author.id, -donate_amount)
-                change_money(user.id, donate_amount)
-                embed = discord.Embed(title=f"{donate_amount} BORB Transferred", description=f"{note}")
-                embed.add_field(name="Recipient", value=user.name, inline=True)
-                embed.add_field(name="Sender", value=ctx.author.name, inline=True)
-                await ctx.send(embed=embed)
-            else:
-                await message.author.send("I'm sorry, you don't have any BORB to gift. 😶")
+        data = query(ctx.author.id)
+        current_money = data[1]
+        if purchase_check(current_money, donate_amount):
+            change_money(ctx.author.id, -donate_amount)
+            change_money(user.id, donate_amount)
+            embed = discord.Embed(title=f"{donate_amount} BORB Transferred", description=f"{note}")
+            embed.add_field(name="Recipient", value=user.name, inline=True)
+            embed.add_field(name="Sender", value=ctx.author.name, inline=True)
+            await ctx.send(embed=embed)
         else:
-            await ctx.send("You need to pick a recipient! 😎")
+            await error_embed(ctx, "I'm sorry, but you don't that much BORB to gift. 😶")
 
-    # @mine.error
-    # async def mineError(self, ctx, error):
-    #     if isinstance(error, commands.CommandOnCooldown):
-    #         await ctx.send(f"You are tired and recently went mining.. Please wait **{calc_time(error.retry_after)}**")
+    @borb.error
+    async def borb_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await error_embed(ctx, "You need to pick a recipient! 🕶")
 
-    @commands.command(name='faq', aliases=['borbcoin'])
-    async def bscFAQ(self, ctx):
-        embed = discord.Embed(title="Borb Coin FAQ! <:borb:452006705035739136>",
-                              description="Borb Coin (BORB) is the latest in cutting edge cryptocurrency.",
-                              inline=False)
-        embed.add_field(name="How do I earn BORB?",
-                        value="A lesser known feature of Goonbot is BorbBot. He determines who has earned them.",
-                        inline=True)
-        embed.add_field(name="What are the odds of me getting a BORB?",
-                        value=f"1:{str(self.borb_chance)}\nA new value is determined after every new BORB is issued.",
-                        inline=True)
-        embed.add_field(name="How do I gift someone one of my BORB?",
-                        value="`.borb @user [quantity] [note]`\nThe default amount is 1. An optional note can be attached.",
-                        inline=True)
-        embed.add_field(name="How do I check my balance?", value="`.balance` or `.wallet`\nEveryone starts with "
-                                                                 "5.\nYou can also `.balance @user`",
-                        inline=True)
-        embed.add_field(name="Does adding a BORB reaction do anything?",
-                        value="**NO**.", inline=True)
-        embed.add_field(name="What is mugging?",
-                        value="You pick a fight with a discord member\n20% You are successful\n20% You lose, badly\n60% The attack fails",
-                        inline=True)
-        embed.set_footer(text="*BORB Coin Council Members: Jaowsh, Poydok, Ectoplax")
-        await ctx.send(embed=embed)
+        if isinstance(error, commands.BadArgument):
+            await error_embed(ctx, 'Command syntax: `.borb @user [donate_amount: number] [note: optional]`')
 
 
 def setup(bot):
