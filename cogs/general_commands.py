@@ -1,8 +1,9 @@
 import random
-import discord
-import asyncio
-from discord.ext import commands
 from pathlib import Path
+
+import discord
+from discord.ext import commands
+from modules.paulie_tools import color_range
 
 files_assets_path = Path("helpers")
 
@@ -11,23 +12,6 @@ class GeneralCommands(commands.Cog, name="General ⚙"):
 
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command(name='suggestion', aliases=['suggest', 'request'])
-    async def suggestion(self, ctx, *, command_suggestion):
-        """Logs a suggestions and requests in notepad file, with username"""
-        message = ctx.message
-        with open(files_assets_path / 'suggestions.txt', mode='a') as file:
-            file.write(f'- {command_suggestion}, {message.author.name}\n')
-        await ctx.send(f'Suggestion submitted, thanks *{message.author.name}*!')
-
-    @commands.command(name='suggestions', aliases=['requests'])
-    async def suggestions(self, ctx):
-        """Displays list of all submitted suggestions, lol"""
-        with open(Path(files_assets_path / 'suggestions.txt'), mode='r') as file:
-            await ctx.send(f'```\n'
-                           f'Current suggestions:\n'
-                           f'{file.read()}\n'
-                           f'```')
 
     @commands.command(name='todo')
     async def todo(self, ctx):
@@ -46,21 +30,20 @@ class GeneralCommands(commands.Cog, name="General ⚙"):
         await ctx.send(embed=embed)
 
     @commands.command(name='coinflip', aliases=['coin', 'flip', 'cf'])
-    async def coinflip(self, ctx, tosses: int = 1):
-        """Coinflip! Add a number after for multiple tosses =]"""
+    async def coinflip(self, ctx):
+        """Coinflip! =]"""
         message = ctx.message
 
-        def coinflip():
-            coin = random.randint(0, 1)
-            if coin:
-                return f'**Heads!** `{coin}`'
-            return f'**Tails!** `{coin}`'
+        def coin_flip():
+            c = random.randint(0, 100)
+            if c >= 50:
+                return f'Heads! ({c})'
+            return f'Tails! ({c})'
 
-        if tosses < 11:
-            for x in range(tosses):
-                await ctx.send(f'{coinflip()}')
-        else:
-            await ctx.send('You can\'t toss more than 10 at a time.')
+        coin = coin_flip()
+        embed = discord.Embed(title=coin)
+        embed.colour = discord.Colour.from_rgb(color_range(), color_range(), color_range())
+        await ctx.send(embed=embed)
 
     @commands.command(name='vtuber', aliases=['vtubers', 'vtube'])
     async def vtuber(self, ctx):
@@ -68,9 +51,7 @@ class GeneralCommands(commands.Cog, name="General ⚙"):
         message = ctx.message
         emojis = ['🤫', '😉']
         await message.delete()
-        shush_msg = await ctx.send(random.choice(emojis))
-        await asyncio.sleep(1)
-        await shush_msg.delete()
+        await ctx.send(random.choice(emojis), delete_after=1)
 
 
 def setup(bot):

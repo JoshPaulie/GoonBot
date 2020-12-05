@@ -17,7 +17,10 @@ class CoronaVirus(commands.Cog, name="Covid 😷"):
 
     @commands.command(name='virus', aliases=['covid', 'corona', 'covid19', 'thevarus', 'varus'])
     async def virus(self, ctx, state: str = None):
-        """Covid Data in Goon States"""
+        """Covid Data in Goon States
+
+        Syntax: `.virus (ok/az/md/ca/none)`
+        *No state abbreviation returns all 4 stats*"""
 
         goon_cases = 1
         goon_mortality_rate = 100  # if i catch the virus and my lungs crap out PLEASE update this for me, we strive

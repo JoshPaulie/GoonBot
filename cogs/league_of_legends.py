@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 import discord
@@ -6,7 +7,7 @@ from riotwatcher import LolWatcher, ApiError
 
 from helpers.LeagueOfLegends.league_helper import create_embed, win_loss_dict
 from helpers.LeagueOfLegends.league_match_parser import MatchParser, latest
-from modules.paulie_tools import calc_time
+from modules.paulie_tools import calc_time, color_range, error_embed
 from passwords_and_keys.RiotApiKey import riot_api_key
 
 watcher = LolWatcher(riot_api_key())
@@ -21,7 +22,9 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
 
     @commands.command(name="matches", aliases=['matchhistory'])
     async def matches(self, ctx, summoner, match_count=3):
-        """Pulls a summoner's last # games"""
+        """Pulls a summoner's last # games
+
+        Syntax `.matches (summoner) (match count 1-15)`"""
         max_matches = 15
         if match_count <= max_matches:
             start_time = datetime.datetime.now()
@@ -39,6 +42,8 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
                         await ctx.send('Rate limited. Command terminated.')
                     elif e.response.status_code == 404:
                         await ctx.send("Summoner was not found.")
+                    elif e.response.status_code == 504:
+                        await error_embed(ctx, "Connect timeout. Try again.")
 
                 for match in match_list['matches']:  # * Per match in match_list
                     match = MatchParser(summoner, match)
@@ -54,15 +59,19 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
                                                inline=True)
 
             loading_time = datetime.datetime.now() - start_time
-            embed_match_list.set_footer(text=f"Loading time: {loading_time.seconds}s\n"
-                                             f"")
-            await ctx.send(embed=embed_match_list)
+            embed_match_list.set_footer(text=f"Loading time: {loading_time.seconds}s\n")
+
+            embed_match_list.colour = discord.Colour.from_rgb(color_range(), color_range(), color_range())
+            match_list_messsage = await ctx.send(embed=embed_match_list)
+            await match_list_messsage.add_reaction('🚮')
         else:
             await ctx.send(f"I'm sorry, but we can only look up {max_matches} matches at a time!")
 
     @commands.command(name="lastgame")
     async def lastgame(self, ctx, summoner):
-        """Pulls the summoner's last game with detailed stats"""
+        """Pulls the summoner's last game with detailed stats
+
+        Syntax `.lastgame (summoner)`"""
         async with ctx.typing():
             try:
                 summoner_data = watcher.summoner.by_name(region, summoner)
@@ -70,9 +79,11 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
                 match_list = watcher.match.matchlist_by_account(region, account_id, begin_index=0, end_index=1)
             except ApiError as e:
                 if e.response.status_code == 429:
-                    await ctx.send('Rate limited. Command terminated.')
+                    await error_embed(ctx, 'Rate limited. Command terminated.')
                 elif e.response.status_code == 404:
-                    await ctx.send("Summoner was not found.")
+                    await error_embed(ctx, "Summoner was not found.")
+                elif e.response.status_code == 504:
+                    await error_embed(ctx, "Connect timeout. Try again.")
 
         last_match = None
         for match in match_list['matches']:
@@ -109,7 +120,8 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
 
         embed_last_game.add_field(name="Damage Taken", value=f"{last_match.total_damage_taken: ,}")
 
-        embed_last_game.add_field(name="Objective Damage", value=f"{last_match.damage_dealt_to_objectives: ,}")
+        embed_last_game.add_field(name="Objective Damage", value=f"{last_match.damage_dealt_to_objectives: ,} "
+                                                                 f"(**{last_match.obj_damage_participation}%**)")
 
         if last_match.biggest_crit > 1000:
             embed_last_game.add_field(name="Biggest Crit ⚡", value=last_match.biggest_crit)
@@ -119,7 +131,7 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
                                         f"(**{last_match.percent_longest_living_duration}%**)")
 
         if last_match.total_time_cc_dealt > 200:
-            embed_last_game.add_field(name="CC Dealt ⚓", value=f"{last_match.total_time_cc_dealt}s")
+            embed_last_game.add_field(name="CC Dealt", value=f"{last_match.total_time_cc_dealt}s")
 
         if last_match.turret_kills > 0:
             embed_last_game.add_field(name="Turrets Destroyed", value=last_match.turret_kills)
@@ -159,11 +171,15 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
         embed_last_game.set_footer(text="Dominance Factor is calculated as followed:\n"
                                         "Kills +2, Deaths -3, Assists +1")
 
-        await ctx.send(embed=embed_last_game)
+        last_game_msg = await ctx.send(embed=embed_last_game)
+
+        await last_game_msg.add_reaction('🚮')
 
     @commands.command(name="rank")
     async def rank(self, ctx, summoner):
-        """Get's the rank of a league summoner!"""
+        """Get's the rank of a league summoner!
+
+        Syntax `.rank (summoner)`"""
         solo_stats = None
         flex_stats = None
 
@@ -175,9 +191,11 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
                 ranked_stats = watcher.league.by_summoner(region, summoner_data['id'])
             except ApiError as e:
                 if e.response.status_code == 429:
-                    await ctx.send('Rate limited. Command terminated.')
+                    await error_embed(ctx, 'Rate limited. Command terminated.')
                 elif e.response.status_code == 404:
-                    await ctx.send("Summoner was not found.")
+                    await error_embed(ctx, "Summoner was not found.")
+                elif e.response.status_code == 504:
+                    await error_embed(ctx, "Connect timeout. Try again.")
 
         for rank in ranked_stats:
             if 'RANKED_SOLO_5x5' == rank['queueType']:
@@ -194,9 +212,7 @@ class LeagueOfLegends(commands.Cog, name="League of Legends! 🎮"):
     async def rank_error(self, ctx, error):
         message = ctx.message
         if isinstance(error, commands.MissingRequiredArgument):
-            error_msg = await ctx.send(f"ℹ You need to add a summoner name!")
-            await message.delete()
-            await error_msg.delete(delay=5)
+            await error_embed(ctx, f"ℹ You need to add a summoner name!")
 
 
 def setup(bot):

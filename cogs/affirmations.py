@@ -16,7 +16,7 @@ class Affirmations(commands.Cog, name='Affirmations! ❤'):
     @commands.cooldown(1, 60, type=BucketType.user)
     @commands.command(name='cily')
     async def cily(self, ctx):
-        """conrad, i love you."""
+        """Reminds Conrad about your true feelings for him"""
         message = ctx.message
         possible_letters = ["Conrad, I love you",
                             "Conrad I love you",
@@ -34,7 +34,7 @@ class Affirmations(commands.Cog, name='Affirmations! ❤'):
     @commands.cooldown(1, 60, type=BucketType.user)
     @commands.command(name='jyb')
     async def jyb(self, ctx):
-        """justin, you're based."""
+        """At any moment, somewhere in the world, Justin is being based."""
         message = ctx.message
         possible_letters = ["Justin you're based",
                             "Justin, you're based.",

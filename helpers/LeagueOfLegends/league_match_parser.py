@@ -20,10 +20,10 @@ def get_champs():
     return watcher.data_dragon.champions(latest, False, 'en_US')
 
 
-def champ_by_id(id: int):
+def champ_by_id(id_champ: int):
     data = get_champs()
     for champ_name, champ_data in data['data'].items():
-        if int(champ_data['key']) == id:
+        if int(champ_data['key']) == id_champ:
             return champ_name
 
 
@@ -105,13 +105,16 @@ class MatchParser:
         self.team_deaths = 0
         self.team_assists = 0
         self.team_damage_dealt = 0
+        self.team_obj_damage = 0
         for participant in match_data['participants']:
             if self.team_id == participant['teamId']:
                 self.team_kills += participant['stats']['kills']
                 self.team_deaths += participant['stats']['deaths']
                 self.team_assists += participant['stats']['assists']
                 self.team_damage_dealt += participant['stats']['totalDamageDealt']
+                self.team_obj_damage += participant['stats']['damageDealtToObjectives']
 
         self.kill_participation = round(((self.kills + self.assists) / self.team_kills) * 100)
         self.death_participation = round((self.deaths / self.team_deaths) * 100)
         self.damage_participation = round((self.total_damage_dealt / self.team_damage_dealt) * 100)
+        self.obj_damage_participation = round((self.damage_dealt_to_objectives / self.team_obj_damage) * 100)

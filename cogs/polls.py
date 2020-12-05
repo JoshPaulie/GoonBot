@@ -4,6 +4,7 @@ from pathlib import Path
 
 import discord
 from discord.ext import commands
+from modules.paulie_tools import error_embed
 
 files_assets_path = Path("helpers")
 
@@ -16,7 +17,9 @@ class Polls(commands.Cog, name="Polls! 🗳"):
 
     @commands.command()
     async def poll(self, ctx, *, question: str):
-        """Creates a poll!"""
+        """Creates a poll! Poll expires after 5 minutes. After "results" are displayed
+
+        Syntax: `.poll (question)`"""
         message = ctx.message
 
         close_time = datetime.datetime.now() + datetime.timedelta(minutes=5)
@@ -53,7 +56,7 @@ class Polls(commands.Cog, name="Polls! 🗳"):
     @poll.error
     async def poll_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("You need to ask a question!")
+            await error_embed(ctx, "You need to ask a question!")
 
 
 def setup(bot):

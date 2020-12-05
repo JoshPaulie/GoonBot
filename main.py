@@ -2,16 +2,24 @@ from pathlib import Path
 
 import colored
 import discord
+import motor.motor_asyncio
 from colored import stylize
 from discord.ext import commands, tasks
 
 from modules.paulie_tools import current_time, random_game_name
 from modules.sql_helper import initialize
 from passwords_and_keys.discord_bot_token import discord_bot_token
+from passwords_and_keys.mongo_creds import mongo_url
 
 intents = discord.Intents(messages=True, guilds=True, reactions=True)
 bot = commands.Bot(command_prefix='.', case_insensitive=True, intents=intents, help_command=None)
 files_assets_path = Path("helpers")
+
+# * Mongo settings
+bot.client = motor.motor_asyncio.AsyncIOMotorClient(mongo_url())
+bot.db = bot.client["goondiscord"]
+bot.balances = bot.db["borb_balances"]
+bot.suggestions = bot.db["suggestions"]
 
 
 def collect_cogs():
@@ -29,7 +37,21 @@ def load_cogs():
             good_loads += 1
         except Exception as e:
             print(f"Failed to load cog {cog}\n{e}")
-    print(f"{stylize(current_time(), colored.fg(110))} {good_loads} Cogs loaded! Logging in...")
+    print(f"{stylize(current_time(), colored.fg(110))} {good_loads} Cogs loaded!")
+
+
+# ! this is meg_ly broken
+def reload_cogs():
+    print("Reloading cogs...")
+    good_loads = 0
+    for cog in collect_cogs():
+        bot.unload_extension(cog)
+        try:
+            bot.load_extension(cog)
+            good_loads += 1
+        except Exception as e:
+            print(f"Failed to load cog {cog}\n{e}")
+    print(f"{good_loads} cogs loaded!")
 
 
 @bot.event

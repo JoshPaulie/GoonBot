@@ -3,7 +3,9 @@ from pathlib import Path
 
 import discord
 from discord.ext import commands
+
 from helpers.countdown_dates.major_events import birthdays, major_events
+from modules.paulie_tools import color_range
 
 files_assets_path = Path("helpers")
 now = datetime.datetime.now()  # ! redundant ⤵
@@ -19,15 +21,16 @@ def how_long_until(date):
     return remaining
 
 
-class MajorEvents(commands.Cog, name="Major Events! 📅"):
+class Countdown(commands.Cog, name="Countdown! 📅"):
 
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
 
-    @commands.command(name='birthday', aliases=['bday', 'holiday', 'event', 'events', 'majorevents', 'holidays'])
-    async def birthday(self, ctx):
-        """Countdown to major events!"""
+    @commands.command(name='countdown',
+                      aliases=['birthday', 'bday', 'holiday', 'event', 'events', 'majorevents', 'holidays'])
+    async def countdown(self, ctx):
+        """Countdown to birthdays and holidays!"""
         message = ctx.message
         birthday_today = False
         holiday_today = False
@@ -43,11 +46,13 @@ class MajorEvents(commands.Cog, name="Major Events! 📅"):
 
         for event_date, event in major_events.items():
             if event_date.day == today_date.day and event_date.month == today_date.month:
-                embed_today_events.add_field(name=f"Today is {event}", value="🥳")
+                embed_today_events.add_field(name=f"Today is {event}", value="📅")
                 holiday_today = True
 
         if birthday_today is True or holiday_today is True:
             await ctx.send(embed=embed_today_events)
+
+        ''' Count down if today is neither a holiday or bday '''
 
         if birthday_today is False and holiday_today is False:
             embed = discord.Embed(title="Birthdays & Major Events! 📅")
@@ -60,10 +65,9 @@ class MajorEvents(commands.Cog, name="Major Events! 📅"):
                 days_left = how_long_until(event_date).days
                 if days_left >= 1:
                     embed.add_field(name=event, value=f"{days_left} days remaining!", inline=True)
-            embed.colour = ctx.author.colour
-
+            embed.colour = discord.Colour.from_rgb(color_range(), color_range(), color_range())
             await ctx.send(embed=embed)
 
 
 def setup(bot):
-    bot.add_cog(MajorEvents(bot))
+    bot.add_cog(Countdown(bot))

@@ -29,7 +29,8 @@ class ListenersAndEvents(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
-        """Prints commands to console"""
+        """Prints commands to PSEUDO console"""
+        # await ctx.message.delete(delay=10)
         if ctx.author.id != bot_config.joshpaulie:
             message = ctx.message
             content = message.content
@@ -39,6 +40,11 @@ class ListenersAndEvents(commands.Cog):
             embed_on_command = discord.Embed(title=goon, description=content)
             embed_on_command.set_footer(text=f'{current_time()}')
             await console_channel.send(embed=embed_on_command)
+
+    @commands.Cog.listener()
+    async def taking_out_the_trash(self, ctx):
+        """litter goes here"""
+
 
     @tasks.loop(seconds=10.0)
     async def time_keeper(self):

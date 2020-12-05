@@ -1,8 +1,10 @@
-import discord
 import random
-import datetime
-from discord.ext import commands
 from pathlib import Path
+
+import discord
+from discord.ext import commands
+
+from modules.paulie_tools import color_range, error_embed
 
 files_assets_path = Path("helpers")
 
@@ -17,39 +19,28 @@ class hobousernames(commands.Cog, name="Hobo's Usernames! 🤖"):
     @commands.command(name='username', aliases=['hobo', 'un', 'name'])
     async def username(self, ctx):
         """Fetches one of Hobo's Signature Usernames"""
-
-        if datetime.datetime.now().month == 11:
-
-            with open(Path(files_assets_path / 'hobo_usernames/hobo_usernames.txt')) as file:
-                random_name = random.choice(file.readlines())
-            await ctx.send(random_name)
-        else:
-            with open(Path(files_assets_path / 'hobo_usernames/hobo_halloween_usernames.txt')) as file:
-                random_name = random.choice(file.readlines())
-            await ctx.send(random_name)
+        with open(Path('helpers/hobo_usernames/hobo_usernames.txt')) as file:
+            random_name = random.choice(file.readlines())
+        embed = discord.Embed(title=random_name)
+        embed.colour = discord.Colour.from_rgb(color_range(), color_range(), color_range())
+        await ctx.send(embed=embed)
 
     @username.error
     async def usernameError(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(
-                f"Hey there! **To prevent repeats and ensure a positive user experience**, you must wait `{round(error.retry_after)}` more seconds.")
-
-    @commands.command(name='addnames')
-    async def howaddnames(self, ctx):
-        """Instructions on how Hobo can add more names"""
-        message = ctx.message
-        with open(files_assets_path / 'how_to_add_names.txt', mode='r') as instructions:
-            read_inst = instructions.read()
-            await message.author.send(read_inst)
+            await error_embed(ctx, f"Hey there! **To prevent repeats and ensure a positive user experience**, "
+                                   f"you must wait {round(error.retry_after)} more second(s)")
 
     @commands.command(name='howmany', aliases=['howmanynames', 'howmanyusernames'])
     async def howmanynames(self, ctx):
         """Lets you know how many names are on Hobo's growing list"""
-        with open(files_assets_path / 'hobo_usernames.txt', mode='r') as file:
+        with open('helpers/hobo_usernames/hobo_usernames.txt', mode='r') as file:
             for i, l in enumerate(file):
                 pass
             amount_of_names = i + 1
-        await ctx.send(f'There are currently `{amount_of_names}` entries in Hobo\'s growing list of names.')
+        embed = discord.Embed(title=f"{amount_of_names} hand-crafted", description="*hobo usernames*")
+        embed.colour = discord.Colour.from_rgb(color_range(), color_range(), color_range())
+        await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):
